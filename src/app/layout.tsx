@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
+import ReduxProvider from "@/redux/provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import Header from "@/components/shared/header/Header";
+import { useLogoutMutation } from "@/queries/auth.query";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const roboto = Roboto({
+  variable: "--font-roboto",
   subsets: ["latin"],
 });
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const robotoMono = Roboto_Mono({
+  variable: "--font-roboto-mono",
   subsets: ["latin"],
 });
 
@@ -25,9 +28,20 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${roboto.variable} ${robotoMono.variable} h-full antialiased 
+      `}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ReduxProvider>
+          <ThemeProvider>
+            <Header />
+            <main className="flex-1 min-h-screen" suppressHydrationWarning>
+              {children}
+            </main>
+          </ThemeProvider>
+        </ReduxProvider>
+      </body>
     </html>
   );
 }
