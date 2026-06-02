@@ -3,12 +3,17 @@ import { NextRequest, NextResponse } from "next/server";
 /**
  * Protected routes
  */
-const protectedRoutes = ["/profile", "/checkout", "/orders", "/dashboard"];
+const protectedRoutes = [
+  "/dashboard/profile",
+  "/checkout",
+  "/orders",
+  "/dashboard",
+];
 
 /**
  * Public auth routes
  */
-const authRoutes = ["/login", "/register"];
+const authRoutes = ["/login", "/register", "/reset-password"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

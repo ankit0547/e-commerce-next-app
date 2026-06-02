@@ -4,18 +4,30 @@ import { useLogoutMutation } from "@/queries/auth.query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { tokenService } from "@/lib/axios/axios";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import { useAppDispatch } from "@/redux/hooks";
 import { logout as logoutAction } from "@/redux/features/auth/authSlice";
+import { Button } from "@/components/ui/button";
+import { TypographyH1 } from "@/components/ui/typography";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAppSelector } from "../../../redux/hooks";
 
 const Header = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { user } = useAppSelector((state) => state.auth);
   const { mutateAsync: logout, isSuccess: isLogoutSuccess } =
     useLogoutMutation();
-
-  console.log("Logout Success:", isLogoutSuccess);
+  const isAuthenticated = !!user;
+  console.log("user", user);
 
   useEffect(() => {
     if (isLogoutSuccess) {
@@ -28,19 +40,65 @@ const Header = () => {
   return (
     <header className="">
       <div className="flex justify-between p-4 container mx-auto">
-        <div className="text-xl font-bold">Ecom Next App</div>
+        <TypographyH1
+          className="text-xl font-bold cursor-pointer"
+          onClick={() => router.push("/")}
+          label="Ecom Next App"
+        />
+
         <div>
-          <ThemeToggle />
-          {isAuthenticated && (
-            <div className="ml-4 inline-block">
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                onClick={() => logout() /* Placeholder for logout function */}
-              >
-                Logout
-              </button>
-            </div>
-          )}
+          <div className="flex items-center align-middle gap-4">
+            <ThemeToggle />
+            {!isAuthenticated && (
+              <>
+                <Button variant="outline" onClick={() => router.push("/login")}>
+                  Login
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/register")}
+                >
+                  Register
+                </Button>
+              </>
+            )}
+
+            {isAuthenticated && (
+              <div>
+                <div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      {/* <Button variant="outline">Open</Button> */}
+                      <Avatar className="cursor-pointer">
+                        <AvatarImage
+                          src={user?.avatar.url}
+                          alt="user avatar"
+                          className="grayscale"
+                        />
+                        <AvatarFallback>
+                          {user?.firstName.charAt(0) + user?.lastName.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuGroup>
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={() => router.push("/dashboard/profile")}
+                        >
+                          Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => logout()}>
+                          Logout
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

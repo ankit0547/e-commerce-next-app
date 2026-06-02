@@ -38,3 +38,15 @@ export const useUserProfileQuery = () => {
     queryFn: UserService.getUserProfile,
   });
 };
+
+export const useForgotPasswordMutation = () => {
+  return useMutation({
+    mutationFn: AuthService.forgotPassword,
+  });
+};
+
+export const useResetPasswordMutation = () => {
+  return useMutation({
+    mutationFn: AuthService.resetPassword,
+  });
+};

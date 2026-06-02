@@ -33,13 +33,11 @@ export const registerSchema = z.object({
     .email("Invalid email address"),
   password: z
     .string()
-    .nonempty("Password is required")
-    .min(6, "Password must be at least 6 characters")
-    .max(18, "Password must be less than 18 characters"),
-  // .regex(
-  //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-  //   "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-  // ),
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Must contain an uppercase letter")
+    .regex(/[a-z]/, "Must contain a lowercase letter")
+    .regex(/\d/, "Must contain a number")
+    .regex(/[^A-Za-z0-9]/, "Must contain a special character"),
 });
 
 export type RegisterSchemaType = z.infer<typeof registerSchema>;

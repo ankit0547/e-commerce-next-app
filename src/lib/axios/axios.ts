@@ -86,7 +86,7 @@ Axios.interceptors.response.use(
     /**
      * Return only API data
      */
-    if (response.data.data.accessToken) {
+    if (response?.data?.data?.accessToken) {
       tokenService.setAccessToken(response.data.data.accessToken);
     }
     return response.data;

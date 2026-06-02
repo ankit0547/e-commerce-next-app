@@ -18,10 +18,22 @@ export const AuthService = {
       payload,
     );
     return result.data as { exists: boolean };
-    // return (await invokeApi(APIConstants.USERNAME_CHECK_REQUEST, payload)).data;
   },
   checkEmailExists: async (payload: { email: string }) => {
     const result = await invokeApi(APIConstants.EMAIL_CHECK_REQUEST, payload);
     return result.data as { exists: boolean };
+  },
+
+  forgotPassword: async (payload: { email: string }) => {
+    return (await invokeApi(APIConstants.FORGOT_PASSWORD_REQUEST, payload))
+      .data;
+  },
+
+  resetPassword: async (payload: {
+    password: string;
+    confirmPassword: string;
+    resetToken: string;
+  }) => {
+    return (await invokeApi(APIConstants.RESET_PASSWORD_REQUEST, payload)).data;
   },
 };

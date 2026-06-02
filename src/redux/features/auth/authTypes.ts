@@ -1,6 +1,11 @@
+// interface User {
+//   firstname: string;
+//   lastname: string;
+//   avtar:
+// }
+
 export interface AuthState {
-  user: Record<string, unknown> | null;
-  isAuthenticated: boolean;
+  user: object | null;
 }
 
 export const registerRequestType = "auth/registerRequest";

@@ -8,37 +8,37 @@ interface ApiConfig {
 
 export const invokeApi = async <T>(
   config: ApiConfig,
-  data?: unknown,
+  payload?: unknown,
 ): Promise<AxiosResponse<T>> => {
   if (config.METHOD === "GET") {
     return Axios({
       method: config.METHOD,
       url: config.URL,
-      params: data || null,
+      params: payload || null,
     });
   } else if (config.METHOD === "POST") {
     return Axios({
       method: config.METHOD,
       url: config.URL,
-      data: data || null,
+      data: payload || null,
     });
   } else if (config.METHOD === "PUT") {
     return Axios({
       method: config.METHOD,
       url: config.URL,
-      data: data || null,
+      data: payload || null,
     });
   } else if (config.METHOD === "DELETE") {
     return Axios({
       method: config.METHOD,
       url: config.URL,
-      data: data || null,
+      data: payload || null,
     });
   } else if (config.METHOD === "PATCH") {
     return Axios({
       method: config.METHOD,
       url: config.URL,
-      data: data || null,
+      data: payload || null,
     });
   } else {
     throw new Error(`Unsupported HTTP method: ${config.METHOD}`);

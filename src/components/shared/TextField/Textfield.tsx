@@ -139,9 +139,7 @@ function Textfield<TFormValues extends FieldValues>({
           placeholder={placeholder}
           onChange={(e) => {
             field.onChange(e);
-
             onFieldChange?.();
-
             handleChange?.(e.target.value);
           }}
         />

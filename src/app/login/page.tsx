@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginSchemaType } from "@/schemas/login.schema";
 import { Button } from "@/components/ui/button";
-import { TypographyH1 } from "@/components/ui/typography";
+import { TypographyH1, TypographyH4 } from "@/components/ui/typography";
 import {
   Field,
   FieldDescription,
@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/redux/hooks";
 import FormServerError from "@/components/shared/FormServerError";
 import { ApiErrorResponse } from "@/types/error.types";
-import Textfield from "@/components/shared/header/TextField/Textfield";
+import Textfield from "@/components/shared/TextField/Textfield";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,6 +47,7 @@ export default function LoginPage() {
       router.push("/dashboard");
     }
   }, [isSuccess, router, loginData, dispatch]);
+
   return (
     <div className="flex items-center justify-center ">
       <form
@@ -54,7 +55,7 @@ export default function LoginPage() {
         className="w-full max-w-md space-y-4 rounded-xl border p-6 mx-auto mt-10"
       >
         <FieldSet>
-          <TypographyH1 text="Login" />
+          <TypographyH1 label="Login" />
           <FieldDescription>Login to your account</FieldDescription>
           <FieldGroup>
             <Textfield
@@ -74,6 +75,21 @@ export default function LoginPage() {
               control={control}
               onFieldChange={() => resetLogin()}
             />
+          </FieldGroup>
+        </FieldSet>
+
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLegend className="text-left">
+                <Link
+                  href="/forgot-password"
+                  className="text-blue-500 hover:underline"
+                >
+                  Forgot your password?
+                </Link>
+              </FieldLegend>
+            </Field>
           </FieldGroup>
         </FieldSet>
 

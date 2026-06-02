@@ -1,92 +1,95 @@
 import React from "react";
 export function TypographyH1({
-  text,
+  label,
   className,
+  onClick,
 }: {
-  text: string;
+  label: string;
   className?: string;
+  onClick?: () => void;
 }) {
   return (
     <h1
       className={`scroll-m-20  text-4xl font-extrabold tracking-tight text-balance ${className || ""}`}
+      onClick={onClick}
     >
-      {text}
+      {label}
     </h1>
   );
 }
 
 export function TypographyH2({
-  text,
+  label,
   className,
 }: {
-  text: string;
+  label: string;
   className?: string;
 }) {
   return (
     <h2
       className={`scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0 ${className || ""}`}
     >
-      {text}
+      {label}
     </h2>
   );
 }
 
 export function TypographyH3({
-  text,
+  label,
   className,
 }: {
-  text: string;
+  label: string;
   className?: string;
 }) {
   return (
     <h3
       className={`scroll-m-20 text-2xl font-semibold tracking-tight ${className || ""}`}
     >
-      {text}
+      {label}
     </h3>
   );
 }
 
 export function TypographyH4({
-  text,
+  label,
   className,
 }: {
-  text: string;
+  label: string;
   className?: string;
 }) {
   return (
     <h4
       className={`scroll-m-20 text-xl font-semibold tracking-tight ${className || ""}`}
     >
-      {text}
+      {label}
     </h4>
   );
 }
 
 export function TypographyP({
-  text,
+  label,
   className,
 }: {
-  text: string;
+  label: string;
   className?: string;
 }) {
   return (
     <p className={`leading-7 [&:not(:first-child)]:mt-6 ${className || ""}`}>
-      {text}
+      {label}
     </p>
   );
 }
 
 export function TypographyBlockquote({
-  text,
+  label,
   className,
 }: {
-  text: string;
+  label: string;
   className?: string;
 }) {
   return (
     <blockquote className={`mt-6 border-l-2 pl-6 italic ${className || ""}`}>
-      &quot;{text}&quot;
+      &quot;{label}&quot;
     </blockquote>
   );
 }
@@ -200,27 +203,29 @@ export function TypographyLarge({
 }
 
 export function TypographySmall({
-  text,
+  label,
   className,
 }: {
-  text: string;
+  label: string;
   className?: string;
 }) {
   return (
     <small className={`text-sm leading-none font-medium ${className || ""}`}>
-      {text}
+      {label}
     </small>
   );
 }
 
 export function TypographyMuted({
-  text,
+  label,
   className,
 }: {
-  text: string;
+  label: string;
   className?: string;
 }) {
   return (
-    <p className={`text-sm text-muted-foreground ${className || ""}`}>{text}</p>
+    <p className={`text-sm text-muted-foreground ${className || ""}`}>
+      {label}
+    </p>
   );
 }

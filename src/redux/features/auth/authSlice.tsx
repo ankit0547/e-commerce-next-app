@@ -1,9 +1,9 @@
+"use client";
 import { createSlice } from "@reduxjs/toolkit";
 import { AuthState } from "./authTypes";
 
 const initialState: AuthState = {
   user: null,
-  isAuthenticated: false,
 };
 
 const authSlice = createSlice({
@@ -11,12 +11,9 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      state.isAuthenticated = true;
       state.user = action.payload;
     },
-
     logout: (state) => {
-      state.isAuthenticated = false;
       state.user = null;
     },
   },

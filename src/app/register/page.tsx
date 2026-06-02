@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/field";
 import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
-import Textfield from "@/components/shared/header/TextField/Textfield";
-import { useCallback, useEffect, useRef, useState } from "react";
+import Textfield from "@/components/shared/TextField/Textfield";
+import { useRef } from "react";
 import { Check, Loader2, X } from "lucide-react";
 import {
   useCheckEmailExistsMutation,
@@ -24,15 +24,15 @@ import {
 import { useRouter } from "next/navigation";
 import FormServerError from "@/components/shared/FormServerError";
 import { ApiErrorResponse } from "@/types/error.types";
+import PasswordRule from "@/components/shared/PasswordRule";
 
 const RegisterPage = () => {
   const router = useRouter();
-  const [serverError, setServerError] = useState<ApiErrorResponse | null>(null);
-
   const {
     control,
     handleSubmit,
     reset: resetForm,
+    watch,
   } = useForm<RegisterSchemaType>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -69,27 +69,11 @@ const RegisterPage = () => {
     reset: resetEmailCheck,
   } = useCheckEmailExistsMutation();
 
-  const usernameExists = isUsernameAvailable?.exists;
-  console.log("username Check:", usernameExists);
-
-  // const serverErrors = registerError;
-  console.log("Register Error:", registerError);
   const onSubmit = async (data: RegisterSchemaType) => {
-    try {
-      await mutateAsync(data);
-      // resetRegisterMutation();
-      resetUsernameCheck();
-      resetEmailCheck();
-
-      /**
-       * Optional:
-       * reset form values here
-       */
-      resetForm();
-    } catch (error) {
-      setServerError(error as ApiErrorResponse);
-    }
-    // router.push("/login");
+    await mutateAsync(data);
+    resetUsernameCheck();
+    resetEmailCheck();
+    resetForm();
   };
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -162,20 +146,46 @@ const RegisterPage = () => {
     isLoading: boolean,
     response?: { exists: boolean },
   ) => {
-    if (isLoading) {
-      return <Loader2 className="h-4 w-4 animate-spin" />;
-    }
-
-    if (!response) {
-      return null;
-    }
-
+    if (isLoading) return <Loader2 className="h-4 w-4 animate-spin" />;
+    if (!response) return null;
     return response.exists ? (
       <X className="h-4 w-4 text-red-500" />
     ) : (
       <Check className="h-4 w-4 text-green-500" />
     );
   };
+
+  const password = watch("password");
+  const passwordChecks = {
+    minLength: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /\d/.test(password),
+    specialChar: /[^A-Za-z0-9]/.test(password),
+  };
+
+  const strengthScore = Object.values(passwordChecks).filter(Boolean).length;
+
+  const getStrength = () => {
+    if (strengthScore <= 2)
+      return {
+        label: "Weak",
+        color: "bg-red-500",
+      };
+
+    if (strengthScore <= 4)
+      return {
+        label: "Medium",
+        color: "bg-yellow-500",
+      };
+
+    return {
+      label: "Strong",
+      color: "bg-green-500",
+    };
+  };
+
+  const strength = getStrength();
   return (
     <div className="flex items-center justify-center ">
       {!isSuccess && (
@@ -184,7 +194,7 @@ const RegisterPage = () => {
           className="w-full max-w-md space-y-4 rounded-xl border p-6 mx-auto"
         >
           <FieldSet>
-            <TypographyH1 text="Register" />
+            <TypographyH1 label="Register" />
             <FieldDescription>Create a new account</FieldDescription>
             <FieldGroup>
               <Textfield
@@ -246,6 +256,57 @@ const RegisterPage = () => {
           <FieldSet>
             <FieldGroup>
               <Field>
+                <FieldLegend>Password Strength</FieldLegend>
+
+                {/* Strength Bar */}
+                <div className="mb-4">
+                  <div className="h-2 w-full rounded-full bg-muted">
+                    <div
+                      className={`h-2 rounded-full transition-all ${strength.color}`}
+                      style={{
+                        width: `${(strengthScore / 5) * 100}%`,
+                      }}
+                    />
+                  </div>
+
+                  <p className="mt-2 text-sm font-medium">{strength.label}</p>
+                </div>
+
+                {/* Requirements */}
+                <div className="rounded-md bg-muted p-3 text-sm">
+                  <ul className="space-y-2">
+                    <PasswordRule
+                      valid={passwordChecks.minLength}
+                      text="At least 8 characters"
+                    />
+
+                    <PasswordRule
+                      valid={passwordChecks.uppercase}
+                      text="One uppercase letter"
+                    />
+
+                    <PasswordRule
+                      valid={passwordChecks.lowercase}
+                      text="One lowercase letter"
+                    />
+
+                    <PasswordRule
+                      valid={passwordChecks.number}
+                      text="One number"
+                    />
+
+                    <PasswordRule
+                      valid={passwordChecks.specialChar}
+                      text="One special character"
+                    />
+                  </ul>
+                </div>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
+          <FieldSet>
+            <FieldGroup>
+              <Field>
                 <FieldLegend className="text-center">
                   Already have an account?{" "}
                   <Link href="/login" className="text-blue-500 hover:underline">
@@ -256,7 +317,7 @@ const RegisterPage = () => {
             </FieldGroup>
           </FieldSet>
 
-          <FormServerError error={serverError} />
+          <FormServerError error={registerError as ApiErrorResponse | null} />
 
           <Button disabled={isRegistering} size="lg" className="w-full">
             {isRegistering ? (
@@ -273,8 +334,8 @@ const RegisterPage = () => {
       {isSuccess && (
         <div className="w-full max-w-md space-y-4 rounded-xl border p-6 mx-auto text-center">
           <Check className="mx-auto mb-4 h-12 w-12 text-green-500" />
-          <TypographyH1 text="Registration Successful!" />
-          <TypographySmall text="Your account has been created successfully. You can now log in." />
+          <TypographyH1 label="Registration Successful!" />
+          <TypographySmall label="Your account has been created successfully. You can now log in." />
           <Button
             onClick={() => router.push("/login")}
             size="lg"

@@ -23,6 +23,14 @@ const APIConstants = {
     URL: "/user/profile",
     METHOD: "GET",
   },
+  FORGOT_PASSWORD_REQUEST: {
+    URL: "/auth/forgot-password",
+    METHOD: "POST",
+  },
+  RESET_PASSWORD_REQUEST: {
+    URL: "/auth/reset-password",
+    METHOD: "POST",
+  },
 };
 
 export default APIConstants;
