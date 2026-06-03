@@ -166,8 +166,8 @@ Axios.interceptors.response.use(
 
         return Axios(originalRequest);
       } catch (refreshError) {
+        debugger;
         processQueue(refreshError, null);
-
         tokenService.clearAccessToken();
 
         /**

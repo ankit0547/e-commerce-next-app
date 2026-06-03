@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const registerSchema = z.object({
+export const editProfileSchema = z.object({
   firstName: z
     .string()
     .nonempty("First name is required")
@@ -31,13 +31,16 @@ export const registerSchema = z.object({
     .nonempty("Email is required")
     .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email address")
     .email("Invalid email address"),
-  password: z
+  address1: z
     .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Must contain an uppercase letter")
-    .regex(/[a-z]/, "Must contain a lowercase letter")
-    .regex(/\d/, "Must contain a number")
-    .regex(/[^A-Za-z0-9]/, "Must contain a special character"),
+    .nonempty("Address 1 is required")
+    .min(2, "Username must be at least 2 characters")
+    .max(50, "Username must be less than 50 characters"),
+  address2: z.string(),
+  country: z.string(),
+  state: z.string(),
+  city: z.string(),
+  postalCode: z.string().max(6, "Postal code cannot be mode than 6 digit"),
 });
 
-export type RegisterSchemaType = z.infer<typeof registerSchema>;
+export type EditProfileSchemaType = z.infer<typeof editProfileSchema>;

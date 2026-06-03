@@ -72,12 +72,15 @@ const Header = () => {
                       {/* <Button variant="outline">Open</Button> */}
                       <Avatar className="cursor-pointer">
                         <AvatarImage
-                          src={user?.avatar.url}
+                          src={user?.avatar?.url}
                           alt="user avatar"
                           className="grayscale"
                         />
                         <AvatarFallback>
-                          {user?.firstName.charAt(0) + user?.lastName.charAt(0)}
+                          {String(
+                            user?.firstName?.charAt(0) +
+                              user?.lastName?.charAt(0),
+                          )}
                         </AvatarFallback>
                       </Avatar>
                     </DropdownMenuTrigger>

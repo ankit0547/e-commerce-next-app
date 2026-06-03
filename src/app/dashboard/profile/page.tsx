@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useAppSelector } from "../../../redux/hooks";
@@ -7,6 +7,9 @@ import { useState } from "react";
 import Textfield from "@/components/shared/TextField/Textfield";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import SelectField from "@/components/shared/Select/Select";
+import ConfirmDialog from "@/components/shared/ConfirmDialog/ConfirmDialog";
+import { editProfileSchema } from "@/schemas/editProfile.schema";
 
 type Address = {
   address1: string;
@@ -114,118 +117,325 @@ export function ProfileSkeleton() {
 function ProfilePage() {
   const { user } = useAppSelector((state) => state.auth as { user: User });
   const [isEdit, setEdit] = useState(false);
-  const { control, handleSubmit } = useForm({
-    // resolver: zodResolver(loginSchema),
-    defaultValues: { firstName: user?.firstName ?? "" },
+  const {
+    control,
+    handleSubmit,
+    reset: resetForm,
+    formState: { isDirty, dirtyFields },
+  } = useForm({
+    resolver: zodResolver(editProfileSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      username: "",
+      email: "",
+      address1: "",
+      address2: "",
+      country: "",
+      state: "",
+      city: "",
+      postalCode: "",
+    },
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
+
+  const getProfileFormValues = (user: User) => ({
+    firstName: user?.firstName,
+    lastName: user?.lastName,
+    username: user?.username,
+    email: user?.email,
+    address1: user?.address.address1,
+    address2: user?.address.address2,
+    country: user?.address.country,
+    state: user?.address.state,
+    city: user?.address.city,
+    postalCode: user?.address.postalCode,
+  });
+
+  useEffect(() => {
+    resetForm(getProfileFormValues(user));
+  }, [user, resetForm]);
+
+  const onSubmit = (data: unknown) => {
+    alert(data);
+    // login(data);
+  };
+
+  const onError = (errors: unknown) => {
+    console.log("FORM ERRORS", errors);
+  };
 
   if (!user) {
     return <ProfileSkeleton />;
   }
-
-  console.log("edit", isEdit);
+  console.log("edit", isDirty);
   return (
     <div className="container mx-auto max-w-5xl p-6">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center">
-            <Image
-              src={user?.avatar.url}
-              alt={user?.firstName}
-              width={100}
-              height={100}
-              className="rounded-full border"
-            />
+      <form onSubmit={handleSubmit(onSubmit, onError)}>
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center">
+              <Image
+                src={user?.avatar.url}
+                alt={user?.firstName}
+                width={100}
+                height={100}
+                className="rounded-full border"
+              />
 
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold">
-                {user.firstName} {user.lastName}
-              </h1>
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold">
+                  {user.firstName} {user.lastName}
+                </h1>
 
-              <p className="text-muted-foreground">@{user.username}</p>
+                <p className="text-muted-foreground">@{user.username}</p>
 
-              <div className="mt-3 flex items-center gap-2">
-                <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
-                  {user.status}
-                </span>
-
-                {user.isEmailVerified ? (
-                  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700">
-                    Verified
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
+                    {user.status}
                   </span>
-                ) : (
-                  <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm text-yellow-700">
-                    Email Not Verified
-                  </span>
+
+                  {user.isEmailVerified ? (
+                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700">
+                      Verified
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm text-yellow-700">
+                      Email Not Verified
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                {!isEdit && (
+                  <Button onClick={() => setEdit((p) => !p)}>
+                    Edit Profile
+                  </Button>
                 )}
+
+                <Button variant="outline">Change Password</Button>
               </div>
             </div>
+          </div>
 
-            <div className="flex gap-2">
-              <Button onClick={() => setEdit((p) => !p)}>Edit Profile</Button>
+          {/* Personal Info */}
+          <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <h2 className="mb-4 text-xl font-semibold">Personal Information</h2>
 
-              <Button variant="outline">Change Password</Button>
+            <div className="grid gap-4 md:grid-cols-2">
+              {!isEdit && (
+                <InfoItem label="First Name" value={user.firstName} />
+              )}
+
+              {isEdit && (
+                <Textfield
+                  control={control}
+                  label="First Name"
+                  placeholder="First Name"
+                  type="text"
+                  name="firstName"
+                  // onFieldChange={() => resetRegisterMutation()}
+                />
+              )}
+
+              {!isEdit && <InfoItem label="Last Name" value={user.lastName} />}
+              {isEdit && (
+                <Textfield
+                  control={control}
+                  label="Last Name"
+                  placeholder="Last Name"
+                  type="text"
+                  name="lastName"
+                  // onFieldChange={() => resetRegisterMutation()}
+                />
+              )}
+
+              {!isEdit && <InfoItem label="Username" value={user.username} />}
+              {isEdit && (
+                <Textfield
+                  control={control}
+                  label="Username"
+                  placeholder="Username"
+                  type="text"
+                  name="username"
+                  // onFieldChange={() => resetRegisterMutation()}
+                />
+              )}
+
+              {!isEdit && <InfoItem label="Email" value={user.email} />}
+              {isEdit && (
+                <Textfield
+                  control={control}
+                  label="Email"
+                  placeholder="Email"
+                  type="email"
+                  name="email"
+                  // onFieldChange={() => resetRegisterMutation()}
+                />
+              )}
             </div>
           </div>
-        </div>
 
-        {/* Personal Info */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-semibold">Personal Information</h2>
+          {/* Address */}
+          <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <h2 className="mb-4 text-xl font-semibold">Address Information</h2>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {!isEdit && <InfoItem label="First Name" value={user.firstName} />}
+            <div className="grid gap-4 md:grid-cols-2">
+              {!isEdit && (
+                <InfoItem
+                  label="Address Line 1"
+                  value={user.address.address1 || "-"}
+                />
+              )}
 
-            {isEdit && (
-              <Textfield
-                control={control}
-                label="First Name"
-                placeholder="First Name"
-                type="text"
-                name="firstName"
-                // onFieldChange={() => resetRegisterMutation()}
-              />
-            )}
+              {!isEdit && (
+                <InfoItem
+                  label="Address Line 2"
+                  value={user.address.address2 || "-"}
+                />
+              )}
+              {!isEdit && (
+                <InfoItem label="Country" value={user.address.country || "-"} />
+              )}
+              {!isEdit && (
+                <InfoItem label="State" value={user.address.state || "-"} />
+              )}
+              {!isEdit && (
+                <InfoItem label="City" value={user.address.city || "-"} />
+              )}
+              {!isEdit && (
+                <InfoItem
+                  label="Postal Code"
+                  value={user.address.postalCode || "-"}
+                />
+              )}
 
-            <InfoItem label="Last Name" value={user.lastName} />
+              {isEdit && (
+                <Textfield
+                  control={control}
+                  label="Address 1"
+                  placeholder="Address 1"
+                  type="text"
+                  name="address1"
+                  // onFieldChange={() => resetRegisterMutation()}
+                />
+              )}
+              {isEdit && (
+                <Textfield
+                  control={control}
+                  label="Address 2"
+                  placeholder="Address 2"
+                  type="text"
+                  name="address2"
+                  // onFieldChange={() => resetRegisterMutation()}
+                />
+              )}
 
-            <InfoItem label="Username" value={user.username} />
+              {isEdit && (
+                <SelectField
+                  control={control}
+                  label="Country"
+                  name="country"
+                  placeholder="Select Country"
+                  options={[
+                    {
+                      label: "India",
+                      value: "india",
+                    },
+                    {
+                      label: "UK",
+                      value: "uk",
+                    },
+                    {
+                      label: "US",
+                      value: "us",
+                    },
+                  ]}
+                />
+              )}
+              {isEdit && (
+                <SelectField
+                  control={control}
+                  label="State"
+                  name="state"
+                  placeholder="Select State"
+                  options={[
+                    {
+                      label: "Uttar Pradesh",
+                      value: "up",
+                    },
+                    {
+                      label: "New Delhi",
+                      value: "nd",
+                    },
+                    {
+                      label: "Punjab",
+                      value: "pb",
+                    },
+                  ]}
+                />
+              )}
+              {isEdit && (
+                <SelectField
+                  control={control}
+                  label="City"
+                  name="city"
+                  placeholder="Select City"
+                  options={[
+                    {
+                      label: "Agra",
+                      value: "ag",
+                    },
+                    {
+                      label: "Mathura",
+                      value: "mth",
+                    },
+                  ]}
+                />
+              )}
 
-            <InfoItem label="Email" value={user.email} />
+              {isEdit && (
+                <Textfield
+                  control={control}
+                  label="Postal code"
+                  placeholder="Postal code"
+                  type="text"
+                  name="postalCode"
+                  // onFieldChange={() => resetRegisterMutation()}
+                />
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Address */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-semibold">Address Information</h2>
+          {isEdit && (
+            <div className="flex justify-end gap-2">
+              {!isDirty && (
+                <Button variant="outline" onClick={() => setEdit((p) => !p)}>
+                  Cancel
+                </Button>
+              )}
+              {isDirty && (
+                <ConfirmDialog
+                  title="Discard Changes"
+                  description="You have unsaved changes. Do you want to discard them?"
+                  confirmText="Discard"
+                  onConfirm={() => {
+                    resetForm();
+                    setEdit(false);
+                  }}
+                  trigger={<Button variant="outline">Cancel</Button>}
+                />
+              )}
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <InfoItem
-              label="Address Line 1"
-              value={user.address.address1 || "-"}
-            />
+              {isDirty && <Button type="submit">Save</Button>}
+            </div>
+          )}
 
-            <InfoItem
-              label="Address Line 2"
-              value={user.address.address2 || "-"}
-            />
-
-            <InfoItem label="City" value={user.address.city || "-"} />
-
-            <InfoItem label="State" value={user.address.state || "-"} />
-
-            <InfoItem label="Country" value={user.address.country || "-"} />
-
-            <InfoItem
-              label="Postal Code"
-              value={user.address.postalCode || "-"}
-            />
-          </div>
-        </div>
-
-        {/* Account Info */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          {/* Account Info */}
+          {/* <div className="rounded-xl border bg-card p-6 shadow-sm">
           <h2 className="mb-4 text-xl font-semibold">Account Information</h2>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -246,8 +456,9 @@ function ProfilePage() {
               value={new Date(user.updatedAt).toLocaleDateString()}
             />
           </div>
+        </div> */}
         </div>
-      </div>
+      </form>
     </div>
   );
 }
