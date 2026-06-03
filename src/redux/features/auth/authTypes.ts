@@ -6,6 +6,7 @@
 
 export interface AuthState {
   user: object | null;
+  isLoadingProfile: boolean;
 }
 
 export const registerRequestType = "auth/registerRequest";

@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { tokenService } from "@/lib/axios/axios";
 // import { useSelector } from "react-redux";
 import { useAppDispatch } from "@/redux/hooks";
-import { logout as logoutAction } from "@/redux/features/auth/authSlice";
+import { logoutAction } from "@/redux/features/auth/authSlice";
 import { Button } from "@/components/ui/button";
 import { TypographyH1 } from "@/components/ui/typography";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -88,7 +88,7 @@ const Header = () => {
                       <DropdownMenuGroup>
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuItem
-                          onClick={() => router.push("/dashboard/profile")}
+                          onClick={() => router.push("/profile")}
                         >
                           Profile
                         </DropdownMenuItem>

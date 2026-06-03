@@ -31,16 +31,18 @@ export const editProfileSchema = z.object({
     .nonempty("Email is required")
     .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email address")
     .email("Invalid email address"),
-  address1: z
-    .string()
-    .nonempty("Address 1 is required")
-    .min(2, "Username must be at least 2 characters")
-    .max(50, "Username must be less than 50 characters"),
-  address2: z.string(),
-  country: z.string(),
-  state: z.string(),
-  city: z.string(),
-  postalCode: z.string().max(6, "Postal code cannot be mode than 6 digit"),
+  address: z.object({
+    address1: z
+      .string()
+      .nonempty("Address 1 is required")
+      .min(2, "Username must be at least 2 characters")
+      .max(50, "Username must be less than 50 characters"),
+    address2: z.string(),
+    country: z.string(),
+    state: z.string(),
+    city: z.string(),
+    postalCode: z.string().max(6, "Postal code cannot be mode than 6 digit"),
+  }),
 });
 
 export type EditProfileSchemaType = z.infer<typeof editProfileSchema>;

@@ -20,6 +20,7 @@ import { useAppDispatch } from "@/redux/hooks";
 import FormServerError from "@/components/shared/FormServerError";
 import { ApiErrorResponse } from "@/types/error.types";
 import Textfield from "@/components/shared/TextField/Textfield";
+import { setUser } from "@/redux/features/auth/authSlice";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,13 +41,19 @@ export default function LoginPage() {
   const onSubmit = (data: LoginSchemaType) => {
     login(data);
   };
+
+  const user = loginData?.user;
+
   console.log("Login Data:", loginData);
   useEffect(() => {
     if (isSuccess && loginData) {
       //  Update the auth state with user data
-      router.push("/dashboard");
+      router.push("/");
     }
-  }, [isSuccess, router, loginData, dispatch]);
+    if (user) {
+      dispatch(setUser(user));
+    }
+  }, [isSuccess, router, loginData, dispatch, user]);
 
   return (
     <div className="flex items-center justify-center ">

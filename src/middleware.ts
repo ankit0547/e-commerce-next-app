@@ -3,12 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 /**
  * Protected routes
  */
-const protectedRoutes = [
-  "/dashboard/profile",
-  "/checkout",
-  "/orders",
-  "/dashboard",
-];
+const protectedRoutes = ["/profile", "/checkout", "/orders"];
 
 /**
  * Public auth routes
@@ -46,7 +41,7 @@ export function middleware(request: NextRequest) {
    * User already logged in
    */
   if (isAuthRoute && refreshToken) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
@@ -60,6 +55,5 @@ export const config = {
 
     "/login",
     "/register",
-    "/dashboard/:path*",
   ],
 };

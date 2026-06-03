@@ -10,6 +10,7 @@ export const invokeApi = async <T>(
   config: ApiConfig,
   payload?: unknown,
 ): Promise<AxiosResponse<T>> => {
+  debugger;
   if (config.METHOD === "GET") {
     return Axios({
       method: config.METHOD,

@@ -31,6 +31,10 @@ const APIConstants = {
     URL: "/auth/reset-password",
     METHOD: "POST",
   },
+  USER_PROFILE_UPDATE_REQUEST: {
+    URL: "/user/profile",
+    METHOD: "PUT",
+  },
 };
 
 export default APIConstants;

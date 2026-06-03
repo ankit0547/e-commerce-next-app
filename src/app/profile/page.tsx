@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "../../../redux/hooks";
+import { useAppSelector } from "../../redux/hooks";
 import { useState } from "react";
 import Textfield from "@/components/shared/TextField/Textfield";
 import { useForm } from "react-hook-form";
@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import SelectField from "@/components/shared/Select/Select";
 import ConfirmDialog from "@/components/shared/ConfirmDialog/ConfirmDialog";
 import { editProfileSchema } from "@/schemas/editProfile.schema";
+import { useProfileUpdateMutation } from "@/queries/user.query";
 
 type Address = {
   address1: string;
@@ -37,7 +38,20 @@ type User = {
   createdAt: string;
   updatedAt: string;
 };
-
+type EditProfileForm = {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  address: {
+    address1: string;
+    address2: string;
+    country: string;
+    state: string;
+    city: string;
+    postalCode: string;
+  };
+};
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse rounded-md bg-muted ${className}`} />;
 }
@@ -122,19 +136,21 @@ function ProfilePage() {
     handleSubmit,
     reset: resetForm,
     formState: { isDirty, dirtyFields },
-  } = useForm({
+  } = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       username: "",
       email: "",
-      address1: "",
-      address2: "",
-      country: "",
-      state: "",
-      city: "",
-      postalCode: "",
+      address: {
+        address1: "",
+        address2: "",
+        country: "",
+        state: "",
+        city: "",
+        postalCode: "",
+      },
     },
     mode: "onChange",
     reValidateMode: "onChange",
@@ -145,26 +161,40 @@ function ProfilePage() {
     lastName: user?.lastName,
     username: user?.username,
     email: user?.email,
-    address1: user?.address.address1,
-    address2: user?.address.address2,
-    country: user?.address.country,
-    state: user?.address.state,
-    city: user?.address.city,
-    postalCode: user?.address.postalCode,
+    address: {
+      address1: user?.address?.address1,
+      address2: user?.address?.address2,
+      country: user?.address?.country,
+      state: user?.address?.state,
+      city: user?.address?.city,
+      postalCode: user?.address?.postalCode,
+    },
   });
 
   useEffect(() => {
     resetForm(getProfileFormValues(user));
   }, [user, resetForm]);
 
-  const onSubmit = (data: unknown) => {
-    alert(data);
+  const {
+    mutateAsync: updateProfile,
+    isPending: isLoggingIn,
+    data: updateProfileData,
+    isSuccess,
+    error: loginError,
+    reset: resetLogin,
+  } = useProfileUpdateMutation();
+
+  const onSubmit = (data: EditProfileForm) => {
+    debugger;
+    updateProfile(data);
     // login(data);
   };
 
-  const onError = (errors: unknown) => {
-    console.log("FORM ERRORS", errors);
-  };
+  // const onError = (ee) => {
+  //   console.log("eeeeee", ee);
+  // };
+
+  console.log("updateProfileData", updateProfileData);
 
   if (!user) {
     return <ProfileSkeleton />;
@@ -172,13 +202,13 @@ function ProfilePage() {
   console.log("edit", isDirty);
   return (
     <div className="container mx-auto max-w-5xl p-6">
-      <form onSubmit={handleSubmit(onSubmit, onError)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-6">
           {/* Header */}
           <div className="rounded-xl border bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-6 md:flex-row md:items-center">
               <Image
-                src={user?.avatar.url}
+                src={user?.avatar?.url}
                 alt={user?.firstName}
                 width={100}
                 height={100}
@@ -187,17 +217,17 @@ function ProfilePage() {
 
               <div className="flex-1">
                 <h1 className="text-3xl font-bold">
-                  {user.firstName} {user.lastName}
+                  {user?.firstName} {user?.lastName}
                 </h1>
 
-                <p className="text-muted-foreground">@{user.username}</p>
+                <p className="text-muted-foreground">@{user?.username}</p>
 
                 <div className="mt-3 flex items-center gap-2">
                   <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
-                    {user.status}
+                    {user?.status}
                   </span>
 
-                  {user.isEmailVerified ? (
+                  {user?.isEmailVerified ? (
                     <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700">
                       Verified
                     </span>
@@ -227,7 +257,7 @@ function ProfilePage() {
 
             <div className="grid gap-4 md:grid-cols-2">
               {!isEdit && (
-                <InfoItem label="First Name" value={user.firstName} />
+                <InfoItem label="First Name" value={user?.firstName} />
               )}
 
               {isEdit && (
@@ -241,7 +271,7 @@ function ProfilePage() {
                 />
               )}
 
-              {!isEdit && <InfoItem label="Last Name" value={user.lastName} />}
+              {!isEdit && <InfoItem label="Last Name" value={user?.lastName} />}
               {isEdit && (
                 <Textfield
                   control={control}
@@ -253,7 +283,7 @@ function ProfilePage() {
                 />
               )}
 
-              {!isEdit && <InfoItem label="Username" value={user.username} />}
+              {!isEdit && <InfoItem label="Username" value={user?.username} />}
               {isEdit && (
                 <Textfield
                   control={control}
@@ -265,7 +295,7 @@ function ProfilePage() {
                 />
               )}
 
-              {!isEdit && <InfoItem label="Email" value={user.email} />}
+              {!isEdit && <InfoItem label="Email" value={user?.email} />}
               {isEdit && (
                 <Textfield
                   control={control}
@@ -287,29 +317,32 @@ function ProfilePage() {
               {!isEdit && (
                 <InfoItem
                   label="Address Line 1"
-                  value={user.address.address1 || "-"}
+                  value={user?.address?.address1 || "-"}
                 />
               )}
 
               {!isEdit && (
                 <InfoItem
                   label="Address Line 2"
-                  value={user.address.address2 || "-"}
+                  value={user?.address?.address2 || "-"}
                 />
               )}
               {!isEdit && (
-                <InfoItem label="Country" value={user.address.country || "-"} />
+                <InfoItem
+                  label="Country"
+                  value={user?.address?.country || "-"}
+                />
               )}
               {!isEdit && (
-                <InfoItem label="State" value={user.address.state || "-"} />
+                <InfoItem label="State" value={user?.address?.state || "-"} />
               )}
               {!isEdit && (
-                <InfoItem label="City" value={user.address.city || "-"} />
+                <InfoItem label="City" value={user?.address?.city || "-"} />
               )}
               {!isEdit && (
                 <InfoItem
                   label="Postal Code"
-                  value={user.address.postalCode || "-"}
+                  value={user?.address?.postalCode || "-"}
                 />
               )}
 
@@ -319,7 +352,7 @@ function ProfilePage() {
                   label="Address 1"
                   placeholder="Address 1"
                   type="text"
-                  name="address1"
+                  name={"address.address1"}
                   // onFieldChange={() => resetRegisterMutation()}
                 />
               )}
@@ -329,7 +362,7 @@ function ProfilePage() {
                   label="Address 2"
                   placeholder="Address 2"
                   type="text"
-                  name="address2"
+                  name="address.address2"
                   // onFieldChange={() => resetRegisterMutation()}
                 />
               )}
@@ -338,7 +371,7 @@ function ProfilePage() {
                 <SelectField
                   control={control}
                   label="Country"
-                  name="country"
+                  name="address.country"
                   placeholder="Select Country"
                   options={[
                     {
@@ -360,7 +393,7 @@ function ProfilePage() {
                 <SelectField
                   control={control}
                   label="State"
-                  name="state"
+                  name="address.state"
                   placeholder="Select State"
                   options={[
                     {
@@ -382,7 +415,7 @@ function ProfilePage() {
                 <SelectField
                   control={control}
                   label="City"
-                  name="city"
+                  name="address.city"
                   placeholder="Select City"
                   options={[
                     {
@@ -403,7 +436,7 @@ function ProfilePage() {
                   label="Postal code"
                   placeholder="Postal code"
                   type="text"
-                  name="postalCode"
+                  name="address.postalCode"
                   // onFieldChange={() => resetRegisterMutation()}
                 />
               )}

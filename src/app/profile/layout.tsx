@@ -4,7 +4,7 @@ import { useAppDispatch } from "@/redux/hooks";
 import { setUser } from "@/redux/features/auth/authSlice";
 import { useEffect } from "react";
 
-export default function DashboardLayout({
+export default function ProfileLayout({
   children,
 }: {
   children: React.ReactNode;
