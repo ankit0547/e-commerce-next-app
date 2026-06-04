@@ -4,7 +4,8 @@ import { AuthState } from "./authTypes";
 
 const initialState: AuthState = {
   user: null,
-  isLoadingProfile: true,
+  isAuthenticated: false,
+  isLoading: true,
 };
 
 const authSlice = createSlice({
@@ -14,8 +15,8 @@ const authSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
     },
-    setLoadingProfile: (state, action) => {
-      state.isLoadingProfile = action.payload;
+    setLoading: (state, action) => {
+      state.isLoading = action.payload;
     },
     logoutAction: (state) => {
       state.user = null;
@@ -23,6 +24,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, logoutAction, setLoadingProfile } = authSlice.actions;
+export const { setUser, logoutAction, setLoading } = authSlice.actions;
 
 export default authSlice.reducer;

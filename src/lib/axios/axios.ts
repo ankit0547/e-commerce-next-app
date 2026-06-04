@@ -1,33 +1,74 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
+/**
+ * ----------------------------------------------------------------
+ * Token Service
+ * ----------------------------------------------------------------
+ */
 export const tokenService = {
-  getAccessToken: () => localStorage.getItem("accessToken"),
+  getAccessToken: () => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return localStorage.getItem("accessToken");
+  },
+
   setAccessToken: (token: string) => {
+    if (typeof window === "undefined") {
+      return;
+    }
     localStorage.setItem("accessToken", token);
   },
+
   clearAccessToken: () => {
+    if (typeof window === "undefined") {
+      return;
+    }
     localStorage.removeItem("accessToken");
   },
 };
 
+/**
+ * ----------------------------------------------------------------
+ * Logout Helper
+ * ----------------------------------------------------------------
+ */
+export const logoutUser = () => {
+  tokenService.clearAccessToken();
+  if (typeof window !== "undefined") {
+    window.location.replace("/login");
+  }
+};
+
+/**
+ * ----------------------------------------------------------------
+ * Types
+ * ----------------------------------------------------------------
+ */
 interface RetryAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
 /**
- * Validate ENV
+ * ----------------------------------------------------------------
+ * ENV Validation
+ * ----------------------------------------------------------------
  */
-if (!process.env.NEXT_PUBLIC_API_URL) {
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_URL) {
   throw new Error("NEXT_PUBLIC_API_URL is missing");
 }
 
 /**
+ * ----------------------------------------------------------------
  * Axios Instance
+ * ----------------------------------------------------------------
  */
 export const Axios = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: API_URL,
   withCredentials: true,
-  timeout: process.env.NODE_ENV === "development" ? 500000 : 10000,
+  timeout: process.env.NODE_ENV === "development" ? 60000 : 10000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -35,7 +76,9 @@ export const Axios = axios.create({
 });
 
 /**
- * Refresh state
+ * ----------------------------------------------------------------
+ * Refresh State
+ * ----------------------------------------------------------------
  */
 let isRefreshing = false;
 
@@ -45,7 +88,9 @@ let failedQueue: {
 }[] = [];
 
 /**
- * Process queued requests
+ * ----------------------------------------------------------------
+ * Process Queue
+ * ----------------------------------------------------------------
  */
 const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((promise) => {
@@ -55,19 +100,32 @@ const processQueue = (error: unknown, token: string | null = null) => {
       promise.resolve(token);
     }
   });
-
   failedQueue = [];
 };
 
 /**
+ * ----------------------------------------------------------------
+ * Public Routes
+ * ----------------------------------------------------------------
+ */
+const PUBLIC_ROUTES = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  "/auth/refresh-token",
+];
+
+/**
+ * ----------------------------------------------------------------
  * Request Interceptor
+ * ----------------------------------------------------------------
  */
 Axios.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = tokenService.getAccessToken();
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const accessToken = tokenService.getAccessToken();
+    if (accessToken && config.headers) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
     if (process.env.NODE_ENV === "development") {
       console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`);
@@ -78,44 +136,85 @@ Axios.interceptors.request.use(
 );
 
 /**
+ * ----------------------------------------------------------------
  * Response Interceptor
+ * ----------------------------------------------------------------
  */
 Axios.interceptors.response.use(
   (response) => {
-    // debugger;
     /**
-     * Return only API data
+     * Store access token automatically
      */
     if (response?.data?.data?.accessToken) {
       tokenService.setAccessToken(response.data.data.accessToken);
     }
+    /**
+     * Return only response.data
+     */
     return response.data;
   },
 
   async (
     error: AxiosError<{
-      errorType?: string;
+      success?: boolean;
+      statusCode?: number;
       message?: string;
       multipleErrors?: unknown[];
-      statusCode?: number;
-      success?: boolean;
     }>,
   ) => {
-    // debugger;
     const originalRequest = error.config as RetryAxiosRequestConfig;
 
     /**
-     * Handle 401
+     * ------------------------------------------------------------
+     * Timeout
+     * ------------------------------------------------------------
      */
-    if (
-      error.response?.status === 401 &&
-      !originalRequest?._retry &&
-      error.response.data?.message !== "Invalid password"
-    ) {
+    if (error.code === "ECONNABORTED") {
+      return Promise.reject({
+        success: false,
+        message: "Request timeout",
+      });
+    }
+    /**
+     * ------------------------------------------------------------
+     * Network Error
+     * ------------------------------------------------------------
+     */
+    if (!error.response) {
+      return Promise.reject({
+        success: false,
+        message: "Network error",
+      });
+    }
+
+    /**
+     * ------------------------------------------------------------
+     * Skip Refresh For Public APIs
+     * ------------------------------------------------------------
+     */
+    const isPublicRoute = PUBLIC_ROUTES.some((route) =>
+      originalRequest?.url?.includes(route),
+    );
+
+    if (isPublicRoute) {
+      return Promise.reject({
+        success: false,
+        statusCode: error.response.status,
+        message: error.response.data?.message || "Something went wrong",
+        errors: error.response.data?.multipleErrors || [],
+      });
+    }
+
+    /**
+     * ------------------------------------------------------------
+     * Handle 401
+     * ------------------------------------------------------------
+     */
+    if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       /**
-       * Queue requests while refreshing
+       * Queue requests while refresh in progress
        */
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -125,7 +224,7 @@ Axios.interceptors.response.use(
                 originalRequest.headers.Authorization = `Bearer ${token}`;
               }
 
-              resolve(Axios(originalRequest));
+              resolve(Axios.request(originalRequest));
             },
             reject,
           });
@@ -136,19 +235,23 @@ Axios.interceptors.response.use(
 
       try {
         /**
-         * Refresh token request
+         * Refresh Access Token
+         *
+         * IMPORTANT:
+         * Use raw axios.
+         * Do NOT use Axios instance.
          */
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
+        const refreshResponse = await axios.get(
+          `${API_URL}/auth/refresh-token`,
           {
             withCredentials: true,
           },
         );
 
-        const newAccessToken = response.data.data.accessToken;
+        const newAccessToken = refreshResponse.data.data.accessToken;
 
         /**
-         * Save token
+         * Save Token
          */
         tokenService.setAccessToken(newAccessToken);
 
@@ -158,28 +261,22 @@ Axios.interceptors.response.use(
         processQueue(null, newAccessToken);
 
         /**
-         * Retry original request
+         * Retry current request
          */
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        if (originalRequest) {
+          originalRequest.headers = axios.AxiosHeaders.from({
+            ...originalRequest.headers,
+            Authorization: `Bearer ${newAccessToken}`,
+          });
         }
-
-        return Axios(originalRequest);
+        return Axios.request(originalRequest);
       } catch (refreshError) {
-        debugger;
         processQueue(refreshError, null);
-        tokenService.clearAccessToken();
-
-        /**
-         * Redirect to login
-         */
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
-
+        logoutUser();
         return Promise.reject({
           success: false,
-          message: "Session expired",
+          statusCode: 401,
+          message: "Session expired. Please login again.",
         });
       } finally {
         isRefreshing = false;
@@ -187,31 +284,13 @@ Axios.interceptors.response.use(
     }
 
     /**
-     * Timeout
-     */
-    if (error.code === "ECONNABORTED") {
-      return Promise.reject({
-        success: false,
-        message: "Request timeout",
-      });
-    }
-
-    /**
-     * Network error
-     */
-    if (!error.response) {
-      return Promise.reject({
-        success: false,
-        message: "Network error",
-      });
-    }
-
-    /**
-     * Backend error response
+     * ------------------------------------------------------------
+     * Backend Error
+     * ------------------------------------------------------------
      */
     return Promise.reject({
       success: false,
-      status: error.response.status,
+      statusCode: error.response.status,
       message: error.response.data?.message || "Something went wrong",
       errors: error.response.data?.multipleErrors || [],
     });

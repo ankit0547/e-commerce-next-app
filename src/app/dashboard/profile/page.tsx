@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "../../redux/hooks";
+import { useAppSelector } from "../../../redux/hooks";
 import { useState } from "react";
 import Textfield from "@/components/shared/TextField/Textfield";
 import { useForm } from "react-hook-form";
@@ -11,47 +11,11 @@ import SelectField from "@/components/shared/Select/Select";
 import ConfirmDialog from "@/components/shared/ConfirmDialog/ConfirmDialog";
 import { editProfileSchema } from "@/schemas/editProfile.schema";
 import { useProfileUpdateMutation } from "@/queries/user.query";
+import { User, EditProfileForm } from "@/redux/features/auth/authTypes";
+import { toast } from "sonner";
+import FormServerError from "@/components/shared/FormServerError";
+import { ApiErrorResponse } from "@/types/error.types";
 
-type Address = {
-  address1: string;
-  address2: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-};
-
-type Avatar = {
-  url: string;
-};
-
-type User = {
-  address: Address;
-  _id: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  avatar: Avatar;
-  status: string;
-  isEmailVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
-type EditProfileForm = {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  address: {
-    address1: string;
-    address2: string;
-    country: string;
-    state: string;
-    city: string;
-    postalCode: string;
-  };
-};
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse rounded-md bg-muted ${className}`} />;
 }
@@ -135,7 +99,7 @@ function ProfilePage() {
     control,
     handleSubmit,
     reset: resetForm,
-    formState: { isDirty, dirtyFields },
+    formState: { isDirty },
   } = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: {
@@ -177,22 +141,14 @@ function ProfilePage() {
 
   const {
     mutateAsync: updateProfile,
-    isPending: isLoggingIn,
     data: updateProfileData,
-    isSuccess,
-    error: loginError,
-    reset: resetLogin,
+    error: updateProfileError,
   } = useProfileUpdateMutation();
 
   const onSubmit = (data: EditProfileForm) => {
-    debugger;
     updateProfile(data);
-    // login(data);
+    setEdit(false);
   };
-
-  // const onError = (ee) => {
-  //   console.log("eeeeee", ee);
-  // };
 
   console.log("updateProfileData", updateProfileData);
 
@@ -202,6 +158,7 @@ function ProfilePage() {
   console.log("edit", isDirty);
   return (
     <div className="container mx-auto max-w-5xl p-6">
+      <FormServerError error={updateProfileError as ApiErrorResponse | null} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-6">
           {/* Header */}

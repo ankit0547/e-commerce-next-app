@@ -4,6 +4,7 @@ import "./globals.css";
 import ReduxProvider from "@/redux/provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import Header from "@/components/shared/header/Header";
+import { Toaster } from "@/components/ui/sonner";
 import { useLogoutMutation } from "@/queries/auth.query";
 
 const roboto = Roboto({
@@ -36,6 +37,7 @@ export default function RootLayout({
         <ReduxProvider>
           <ThemeProvider>
             <Header />
+            <Toaster />
             <main className="flex-1 min-h-screen" suppressHydrationWarning>
               {children}
             </main>

@@ -48,7 +48,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (isSuccess && loginData) {
       //  Update the auth state with user data
-      router.push("/");
+      router.push("/dashboard");
     }
     if (user) {
       dispatch(setUser(user));

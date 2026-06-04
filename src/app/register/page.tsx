@@ -25,6 +25,8 @@ import { useRouter } from "next/navigation";
 import FormServerError from "@/components/shared/FormServerError";
 import { ApiErrorResponse } from "@/types/error.types";
 import PasswordRule from "@/components/shared/PasswordRule";
+import { debounce } from "lodash";
+import { useCallback, useEffect, useMemo } from "react";
 
 const RegisterPage = () => {
   const router = useRouter();
@@ -78,69 +80,132 @@ const RegisterPage = () => {
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleOnUsernameChange = (value: string) => {
-    // console.log("Username change:", value, timeoutRef);
-    /**
-     * Always clear previous timeout
-     */
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+  // const handleOnUsernameChange = (value: string) => {
+  //   // console.log("Username change:", value, timeoutRef);
+  //   /**
+  //    * Always clear previous timeout
+  //    */
+  //   if (timeoutRef.current) {
+  //     clearTimeout(timeoutRef.current);
+  //   }
 
+  //   const trimmedValue = value.trim();
+
+  //   /**
+  //    * Skip API call when:
+  //    * - empty
+  //    * - removing text
+  //    * - less than 3 chars
+  //    */
+  //   if (trimmedValue.length < 3) {
+  //     resetUsernameCheck();
+  //     return;
+  //   }
+
+  //   /**
+  //    * Debounced API call
+  //    */
+  //   _debounce;
+  //   timeoutRef.current = setTimeout(() => {
+  //     checkUsernameExists({ username: trimmedValue });
+  //   }, 500);
+  // };
+
+  const debouncedUsernameCheck = useCallback(
+    debounce((username: string) => {
+      checkUsernameExists({ username });
+    }, 500),
+    [],
+  );
+
+  const handleOnUsernameChange = (value: string) => {
     const trimmedValue = value.trim();
 
-    /**
-     * Skip API call when:
-     * - empty
-     * - removing text
-     * - less than 3 chars
-     */
     if (trimmedValue.length < 3) {
+      debouncedUsernameCheck.cancel();
       resetUsernameCheck();
       return;
     }
 
-    /**
-     * Debounced API call
-     */
-    timeoutRef.current = setTimeout(() => {
-      checkUsernameExists({ username: trimmedValue });
-    }, 500);
+    debouncedUsernameCheck(trimmedValue);
   };
-  const handleOnEmailChange = (value: string) => {
-    // console.log("Username change:", value, timeoutRef);
-    /**
-     * Always clear previous timeout
-     */
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+  useEffect(() => {
+    return () => {
+      debouncedUsernameCheck.cancel();
+    };
+  }, [debouncedUsernameCheck]);
 
+  const debouncedEmailCheck = useMemo(
+    () =>
+      debounce((email: string) => {
+        checkEmailExists({ email });
+      }, 500),
+    [checkEmailExists],
+  );
+
+  const handleOnEmailChange = (value: string) => {
     const trimmedValue = value.trim();
 
-    /**
-     * Skip API call when:
-     * - empty
-     * - removing text
-     * - less than 3 chars
-     */
+    // Minimum length check
     if (trimmedValue.length < 3) {
+      debouncedEmailCheck.cancel();
       resetEmailCheck();
       return;
     }
 
-    if (!trimmedValue.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(trimmedValue)) {
+      debouncedEmailCheck.cancel();
       resetEmailCheck();
       return;
     }
 
-    /**
-     * Debounced API call
-     */
-    timeoutRef.current = setTimeout(() => {
-      checkEmailExists({ email: trimmedValue });
-    }, 500);
+    // Debounced API call
+    debouncedEmailCheck(trimmedValue);
   };
+
+  useEffect(() => {
+    return () => {
+      debouncedEmailCheck.cancel();
+    };
+  }, [debouncedEmailCheck]);
+
+  // const handleOnEmailChange = (value: string) => {
+  //   // console.log("Username change:", value, timeoutRef);
+  //   /**
+  //    * Always clear previous timeout
+  //    */
+  //   if (timeoutRef.current) {
+  //     clearTimeout(timeoutRef.current);
+  //   }
+
+  //   const trimmedValue = value.trim();
+
+  //   /**
+  //    * Skip API call when:
+  //    * - empty
+  //    * - removing text
+  //    * - less than 3 chars
+  //    */
+  //   if (trimmedValue.length < 3) {
+  //     resetEmailCheck();
+  //     return;
+  //   }
+
+  //   if (!trimmedValue.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+  //     resetEmailCheck();
+  //     return;
+  //   }
+
+  //   /**
+  //    * Debounced API call
+  //    */
+  //   timeoutRef.current = setTimeout(() => {
+  //     checkEmailExists({ email: trimmedValue });
+  //   }, 500);
+  // };
 
   const getAvailabilityIcon = (
     isLoading: boolean,

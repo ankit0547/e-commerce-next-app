@@ -6,7 +6,6 @@ export const UserService = {
     return (await invokeApi(APIConstants.USER_PROFILE_REQUEST)).data;
   },
   updateUserProfile: async (payload) => {
-    debugger;
     return (await invokeApi(APIConstants.USER_PROFILE_UPDATE_REQUEST, payload))
       .data;
   },

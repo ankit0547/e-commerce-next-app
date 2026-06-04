@@ -41,7 +41,7 @@ export function middleware(request: NextRequest) {
    * User already logged in
    */
   if (isAuthRoute && refreshToken) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();

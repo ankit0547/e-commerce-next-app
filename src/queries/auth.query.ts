@@ -32,10 +32,18 @@ export const useLogoutMutation = () => {
   });
 };
 
-export const useUserProfileQuery = () => {
+export const useUserProfileQuery = ({
+  enabled = true,
+  retry = false,
+}: {
+  enabled?: boolean;
+  retry?: boolean;
+}) => {
   return useQuery({
     queryKey: ["profile"],
     queryFn: UserService.getUserProfile,
+    enabled,
+    retry,
   });
 };
 
