@@ -48,7 +48,6 @@ const RegisterPage = () => {
     reValidateMode: "onChange",
   });
 
-  console.log("Parent Render");
   const {
     mutateAsync,
     isPending: isRegistering,
@@ -77,39 +76,6 @@ const RegisterPage = () => {
     resetEmailCheck();
     resetForm();
   };
-
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // const handleOnUsernameChange = (value: string) => {
-  //   // console.log("Username change:", value, timeoutRef);
-  //   /**
-  //    * Always clear previous timeout
-  //    */
-  //   if (timeoutRef.current) {
-  //     clearTimeout(timeoutRef.current);
-  //   }
-
-  //   const trimmedValue = value.trim();
-
-  //   /**
-  //    * Skip API call when:
-  //    * - empty
-  //    * - removing text
-  //    * - less than 3 chars
-  //    */
-  //   if (trimmedValue.length < 3) {
-  //     resetUsernameCheck();
-  //     return;
-  //   }
-
-  //   /**
-  //    * Debounced API call
-  //    */
-  //   _debounce;
-  //   timeoutRef.current = setTimeout(() => {
-  //     checkUsernameExists({ username: trimmedValue });
-  //   }, 500);
-  // };
 
   const debouncedUsernameCheck = useCallback(
     debounce((username: string) => {
@@ -171,41 +137,6 @@ const RegisterPage = () => {
       debouncedEmailCheck.cancel();
     };
   }, [debouncedEmailCheck]);
-
-  // const handleOnEmailChange = (value: string) => {
-  //   // console.log("Username change:", value, timeoutRef);
-  //   /**
-  //    * Always clear previous timeout
-  //    */
-  //   if (timeoutRef.current) {
-  //     clearTimeout(timeoutRef.current);
-  //   }
-
-  //   const trimmedValue = value.trim();
-
-  //   /**
-  //    * Skip API call when:
-  //    * - empty
-  //    * - removing text
-  //    * - less than 3 chars
-  //    */
-  //   if (trimmedValue.length < 3) {
-  //     resetEmailCheck();
-  //     return;
-  //   }
-
-  //   if (!trimmedValue.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-  //     resetEmailCheck();
-  //     return;
-  //   }
-
-  //   /**
-  //    * Debounced API call
-  //    */
-  //   timeoutRef.current = setTimeout(() => {
-  //     checkEmailExists({ email: trimmedValue });
-  //   }, 500);
-  // };
 
   const getAvailabilityIcon = (
     isLoading: boolean,

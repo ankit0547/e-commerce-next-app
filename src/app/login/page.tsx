@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginSchemaType } from "@/schemas/login.schema";
 import { Button } from "@/components/ui/button";
-import { TypographyH1, TypographyH4 } from "@/components/ui/typography";
+import { TypographyH1 } from "@/components/ui/typography";
 import {
   Field,
   FieldDescription,
@@ -44,7 +44,6 @@ export default function LoginPage() {
 
   const user = loginData?.user;
 
-  console.log("Login Data:", loginData);
   useEffect(() => {
     if (isSuccess && loginData) {
       //  Update the auth state with user data

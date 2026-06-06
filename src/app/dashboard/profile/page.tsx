@@ -143,6 +143,7 @@ function ProfilePage() {
     mutateAsync: updateProfile,
     data: updateProfileData,
     error: updateProfileError,
+    isPending,
   } = useProfileUpdateMutation();
 
   const onSubmit = (data: EditProfileForm) => {
@@ -150,12 +151,9 @@ function ProfilePage() {
     setEdit(false);
   };
 
-  console.log("updateProfileData", updateProfileData);
-
-  if (!user) {
+  if (isPending) {
     return <ProfileSkeleton />;
   }
-  console.log("edit", isDirty);
   return (
     <div className="container mx-auto max-w-5xl p-6">
       <FormServerError error={updateProfileError as ApiErrorResponse | null} />
@@ -165,8 +163,8 @@ function ProfilePage() {
           <div className="rounded-xl border bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-6 md:flex-row md:items-center">
               <Image
-                src={user?.avatar?.url}
-                alt={user?.firstName}
+                src={user?.avatar?.url || "/images/default-avatar.png"}
+                alt={user?.firstName || "User"}
                 width={100}
                 height={100}
                 className="rounded-full border"

@@ -113,13 +113,13 @@ export default function Header() {
     }
   }, [isLogoutSuccess, router, dispatch, logout]);
 
-  const { user } = useAppSelector((state) => state.auth);
-  const isAuthenticated = !!user;
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isLoading } = useAppSelector((state) => state.ui);
+  // const isAuthenticated = !!user;
 
-  if (!isAuthenticated) {
+  if (isLoading) {
     return <HeaderSkeleton />;
   }
-  console.log("DDDD>>", isAuthenticated, pathname !== "/dashboard");
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
       <div className="container mx-auto flex h-16 items-center gap-6 px-4">
@@ -176,7 +176,7 @@ export default function Header() {
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
 
-          {!isAuthenticated ? (
+          {!isAuthenticated && (
             <>
               <Button variant="ghost" asChild>
                 <Link href="/login">Login</Link>
@@ -186,7 +186,9 @@ export default function Header() {
                 <Link href="/register">Register</Link>
               </Button>
             </>
-          ) : (
+          )}
+
+          {isAuthenticated && (
             <>
               <Button variant="ghost" size="icon">
                 <Heart className="h-5 w-5" />

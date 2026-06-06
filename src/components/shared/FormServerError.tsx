@@ -5,10 +5,9 @@ import { ApiErrorResponse } from "@/types/error.types";
 
 type FormServerErrorProps = {
   error?: ApiErrorResponse | null;
-  resetServerErrors?: () => void;
 };
 
-function FormServerError({ error, resetServerErrors }: FormServerErrorProps) {
+function FormServerError({ error }: FormServerErrorProps) {
   if (!error) {
     return null;
   }
@@ -19,7 +18,7 @@ function FormServerError({ error, resetServerErrors }: FormServerErrorProps) {
    * Field errors should be displayed
    * by React Hook Form fields.
    */
-  let globalErrors =
+  const globalErrors =
     error?.errors ||
     error?.errors?.filter((err) => err.errorKey === "unknown") ||
     [];
@@ -31,14 +30,6 @@ function FormServerError({ error, resetServerErrors }: FormServerErrorProps) {
     globalErrors.length > 0
       ? globalErrors.map((err) => err.errorMessage)
       : [error.message];
-
-  console.log("FormServerError messages:", error);
-
-  const handleDismiss = () => {
-    if (globalErrors.length > 0 && resetServerErrors) {
-      globalErrors = [];
-    }
-  };
 
   return (
     <div className="space-y-2 rounded-md border border-red-200 bg-red-50 p-4">

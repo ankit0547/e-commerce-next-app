@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 /**
  * Protected routes
  */
-const protectedRoutes = ["/profile", "/checkout", "/orders"];
+const protectedRoutes = ["/dashboard/profile", "/checkout", "/orders"];
 
 /**
  * Public auth routes
@@ -49,7 +49,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/profile/:path*",
+    "/dashboard/profile/:path*",
     "/checkout/:path*",
     "/orders/:path*",
 

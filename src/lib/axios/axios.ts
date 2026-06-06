@@ -1,4 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { startLoading, stopLoading } from "@/redux/features/ui/ui.slice";
+import { store } from "@/redux/store";
 
 /**
  * ----------------------------------------------------------------
@@ -130,6 +132,7 @@ Axios.interceptors.request.use(
     if (process.env.NODE_ENV === "development") {
       console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`);
     }
+    store.dispatch(startLoading());
     return config;
   },
   (error) => Promise.reject(error),
@@ -151,6 +154,7 @@ Axios.interceptors.response.use(
     /**
      * Return only response.data
      */
+    store.dispatch(stopLoading());
     return response.data;
   },
 
@@ -241,6 +245,7 @@ Axios.interceptors.response.use(
          * Use raw axios.
          * Do NOT use Axios instance.
          */
+
         const refreshResponse = await axios.get(
           `${API_URL}/auth/refresh-token`,
           {
@@ -259,7 +264,7 @@ Axios.interceptors.response.use(
          * Retry queued requests
          */
         processQueue(null, newAccessToken);
-
+        store.dispatch(startLoading());
         /**
          * Retry current request
          */
@@ -272,6 +277,7 @@ Axios.interceptors.response.use(
         return Axios.request(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
+        store.dispatch(stopLoading());
         logoutUser();
         return Promise.reject({
           success: false,
@@ -282,7 +288,7 @@ Axios.interceptors.response.use(
         isRefreshing = false;
       }
     }
-
+    store.dispatch(stopLoading());
     /**
      * ------------------------------------------------------------
      * Backend Error

@@ -1,5 +1,5 @@
 "use client";
-import UserInitializer from "@/components/providers/UserInitializer";
+
 import { useEffect } from "react";
 import { useAppSelector } from "@/redux/hooks";
 import { useRouter } from "next/navigation";
@@ -19,9 +19,9 @@ export default function DashboardLayout({
   // }, [isLoading, isAuthenticated, router]);
   return (
     <>
-      <UserInitializer>
-        <div className="container mx-auto">{children}</div>
-      </UserInitializer>
+      {/* <UserInitializer> */}
+      <div className="container mx-auto">{children}</div>
+      {/* </UserInitializer> */}
     </>
   );
 }

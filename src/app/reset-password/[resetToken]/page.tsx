@@ -84,8 +84,6 @@ export default function ResetPasswordPage() {
 
   const strength = getStrength();
 
-  console.log("Password:", control);
-
   if (isSuccess) {
     return (
       <div className="flex items-center justify-center">

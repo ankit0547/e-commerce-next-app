@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import Header from "@/components/shared/header/Header";
 import { Toaster } from "@/components/ui/sonner";
 import { useLogoutMutation } from "@/queries/auth.query";
+import UserInitializer from "@/components/providers/UserInitializer";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -36,11 +37,13 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ReduxProvider>
           <ThemeProvider>
-            <Header />
-            <Toaster />
-            <main className="flex-1 min-h-screen" suppressHydrationWarning>
-              {children}
-            </main>
+            <UserInitializer>
+              <Header />
+              <Toaster />
+              <main className="flex-1 min-h-screen" suppressHydrationWarning>
+                {children}
+              </main>
+            </UserInitializer>
           </ThemeProvider>
         </ReduxProvider>
       </body>

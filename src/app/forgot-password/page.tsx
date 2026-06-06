@@ -47,11 +47,8 @@ export default function ForgotPasswordPage() {
   } = useForgotPasswordMutation();
 
   const onSubmit = async (data: ForgotPasswordSchemaType) => {
-    console.log(data);
     await forgotPassword(data);
   };
-
-  console.log("isSuccess:", isSuccess, data, forgotPasswordError);
 
   if (isSuccess) {
     return (
