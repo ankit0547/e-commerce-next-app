@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "../../../redux/hooks";
+import { useAppSelector } from "../../redux/hooks";
 import { useState } from "react";
 import Textfield from "@/components/shared/TextField/Textfield";
 import { useForm } from "react-hook-form";

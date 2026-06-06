@@ -20,7 +20,7 @@ export default function UserInitializer({
 
   const { data, isSuccess, isError } = useUserProfileQuery({
     enabled: !!accessToken,
-    retry: false,
+    retry: true,
   });
 
   useEffect(() => {

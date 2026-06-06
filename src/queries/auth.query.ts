@@ -1,6 +1,8 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AuthService } from "@/services/auth/auth.service";
 import { UserService } from "@/services/user/user.service";
+import { useAppDispatch } from "@/redux/hooks";
+import { setUser } from "@/redux/features/auth/authSlice";
 
 export const useRegisterMutation = () => {
   return useMutation({
@@ -9,8 +11,13 @@ export const useRegisterMutation = () => {
 };
 
 export const useLoginMutation = () => {
+  const dispatch = useAppDispatch();
   return useMutation({
     mutationFn: AuthService.login,
+    onSettled: (data: unknown) => {
+      const user = (data as { user?: unknown } | undefined)?.user;
+      if (user) dispatch(setUser(user));
+    },
   });
 };
 
@@ -44,6 +51,7 @@ export const useUserProfileQuery = ({
     queryFn: UserService.getUserProfile,
     enabled,
     retry,
+    refetchOnMount: "always",
   });
 };
 

@@ -6,8 +6,6 @@ export default function ProfileLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { data, isSuccess, isError } = useUserProfileQuery({
-    retry: false,
-  });
+  const { data, isSuccess, isError } = useUserProfileQuery({});
   return children;
 }

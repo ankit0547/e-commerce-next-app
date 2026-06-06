@@ -132,17 +132,14 @@ export default function Header() {
         <NavigationMenu className="hidden lg:flex">
           <NavigationMenuList>
             <NavigationMenuItem>
-              <Link
-                href="/dashboard/products"
-                className="px-4 py-2 text-sm font-medium"
-              >
+              <Link href="/products" className="px-4 py-2 text-sm font-medium">
                 Products
               </Link>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
               <Link
-                href="/dashboard/categories"
+                href="/categories"
                 className="px-4 py-2 text-sm font-medium"
               >
                 Categories
@@ -150,10 +147,7 @@ export default function Header() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <Link
-                href="/dashboard/deals"
-                className="px-4 py-2 text-sm font-medium"
-              >
+              <Link href="/deals" className="px-4 py-2 text-sm font-medium">
                 Deals
               </Link>
             </NavigationMenuItem>
@@ -225,11 +219,11 @@ export default function Header() {
                   <DropdownMenuSeparator />
 
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard/profile">Profile</Link>
+                    <Link href="/profile">Profile</Link>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard/orders">Orders</Link>
+                    <Link href="/orders">Orders</Link>
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
